@@ -192,9 +192,11 @@ class MainActivity : AppCompatActivity() {
         } else {
             return_string = "We are actively searching for vaccines based on the district " +
                     Constants.district_names.get(
+                        Constants.district_ids.indexOf(
                         sharedPreferences.getString(
                             Constants.ConstantSharedPreferences.district_id, "0"
-                        )!!.toInt()
+                        )
+                        )
                     )
         }
         return return_string
