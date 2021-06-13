@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.onBoardingFragment"
+    android:layout_marginBottom="40dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="20dp"
+        android:layout_gravity="center">
+        <ImageView
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:src="@drawable/intro_image"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="20dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Get Alerts when Vaccine is available"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:textAlignment="center"
+            android:gravity="center_horizontal"
+            android:text="Tired of waiting for Vaccines? Let the app regularly check on your behlaf, and get an alert when a suitable slot is available for your desired location." />
+        <Button
+            android:id="@+id/button_get_started"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GET STARTED"
+            android:layout_gravity="center_horizontal"
+            style="?attr/materialButtonStyle" />
+    </LinearLayout>
+</FrameLayout>
