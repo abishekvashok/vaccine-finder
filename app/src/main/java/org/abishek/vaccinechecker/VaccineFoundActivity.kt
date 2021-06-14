@@ -20,7 +20,8 @@ class VaccineFoundActivity : AppCompatActivity() {
         val center_name = intent.getStringExtra("place")
         val center_address = intent.getStringExtra("address")
         val capacity = intent.getIntExtra("capacity", 0).toString()
-        var final_text = "We found "+capacity+" vaccine(s) that are available tomorrow"
+        val dateFound = intent.getStringExtra("date")
+        var final_text = "We found "+capacity+" vaccine(s) that are available at "+dateFound
         if(center_name?.isNotEmpty() == true) {
             final_text = final_text + " at " + center_name + ", " + center_address
         }

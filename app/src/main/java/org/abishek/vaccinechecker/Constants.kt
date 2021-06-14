@@ -16,6 +16,9 @@ object Constants {
         const val center_name = "center_name"
         const val center_address = "center_address"
         const val capacity = "capacity"
+        const val autostart = "autostart"
+        const val autostart_enabled = 1
+        const val autostart_disabled = 0
     }
     object SearchWith {
         const val pincode = 1

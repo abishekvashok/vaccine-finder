@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -61,65 +62,90 @@ class jobIntentService: JobIntentService() {
             notify(Constants.NOTIFICATION_ID, builder.build())
         }
         val gc = GregorianCalendar()
-        gc.add(Calendar.DATE, 1)
         val dateFormat: DateFormat = SimpleDateFormat("dd-MM-yyyy")
-        val date = dateFormat.format(gc.getTime())
-        val mode = sharedPreferences.getInt(Constants.ConstantSharedPreferences.search_with, Constants.SearchWith.pincode)
-        val url: String?
-        val request: JsonObjectRequest?
-        if(mode == Constants.SearchWith.district){
-            url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?date=" + date + "&district_id=" + sharedPreferences.getString(Constants.ConstantSharedPreferences.district_id, "000")
-            request = JsonObjectRequest(url,null,
-                {
-                    Log.e("Network callack", it.toString())
-                    val centers: JSONArray = it.get("centers") as JSONArray
-                    var i = 0
-                    while(i < centers.length()) {
-                        val center_name = (centers.get(i) as JSONObject).get("name").toString()
-                        val center_address = (centers.get(i) as JSONObject).get("address").toString()
-                        val sessions = (centers.get(i) as JSONObject).get("sessions") as JSONArray
+        var vaccineFound = false
+        var checkDates = 1
+        while((checkDates <= 7) && (vaccineFound == false)) {
+            gc.add(Calendar.DATE, 1)
+            val date = dateFormat.format(gc.getTime())
+            val mode = sharedPreferences.getInt(
+                Constants.ConstantSharedPreferences.search_with,
+                Constants.SearchWith.pincode
+            )
+            val url: String?
+            val request: JsonObjectRequest?
+            if (mode == Constants.SearchWith.district) {
+                url =
+                    "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?date=" + date + "&district_id=" + sharedPreferences.getString(
+                        Constants.ConstantSharedPreferences.district_id,
+                        "000"
+                    )
+                request = JsonObjectRequest(url, null,
+                    {
+                        val centers: JSONArray = it.get("centers") as JSONArray
+                        var i = 0
+                        while (i < centers.length()) {
+                            val center_name = (centers.get(i) as JSONObject).get("name").toString()
+                            val center_address =
+                                (centers.get(i) as JSONObject).get("address").toString()
+                            val sessions =
+                                (centers.get(i) as JSONObject).get("sessions") as JSONArray
+                            var j = 0
+                            while (j < sessions.length()) {
+                                val session = (sessions.get(j) as JSONObject)
+                                if (session.get("min_age_limit").toString().toInt() <= min_age) {
+                                    val capacity =
+                                        session.get("available_capacity").toString().toInt()
+                                    if (capacity > 0) {
+                                        createVaccineFoundNotification(
+                                            center_name,
+                                            center_address,
+                                            capacity,
+                                            date.toString()
+                                        )
+                                        vaccineFound = true
+                                    }
+                                }
+                                j++
+                            }
+                            i++;
+                        }
+                    },
+                    {
+                        VolleyLog.d(it.message);
+                    }
+                )
+            } else {
+                url =
+                    "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByPin?date=" + date + "&pincode=" + sharedPreferences.getString(
+                        Constants.ConstantSharedPreferences.pincode,
+                        "000000"
+                    )
+                request = JsonObjectRequest(url, null,
+                    {
+                        val sessions = it.get("sessions") as JSONArray
                         var j = 0
-                        while(j < sessions.length()) {
+                        while (j < sessions.length()) {
                             val session = (sessions.get(j) as JSONObject)
-                            if(session.get("min_age_limit").toString().toInt() <= min_age) {
+                            if (session.get("min_age_limit").toString().toInt() <= min_age) {
                                 val capacity = session.get("available_capacity").toString().toInt()
-                                if(capacity > 0) {
-                                    createVaccineFoundNotification(center_name,center_address,capacity)
+                                if (capacity > 0) {
+                                    createVaccineFoundNotification("", "", capacity, date.toString())
+                                    vaccineFound = true
                                 }
                             }
                             j++
                         }
-                        i++;
+                    },
+                    {
+                        VolleyLog.d(it.message);
                     }
-                },
-                {
-                    VolleyLog.d(it.message);
-                }
-            )
-        } else {
-            url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByPin?date=" + date + "&pincode=" + sharedPreferences.getString(Constants.ConstantSharedPreferences.pincode, "000000")
-            request = JsonObjectRequest(url,null,
-                {
-                    val sessions = it.get("sessions") as JSONArray
-                    var j = 0
-                    while(j < sessions.length()) {
-                        val session = (sessions.get(j) as JSONObject)
-                        if(session.get("min_age_limit").toString().toInt() <= min_age) {
-                            val capacity = session.get("available_capacity").toString().toInt()
-                            if(capacity > 0) {
-                                createVaccineFoundNotification("","",capacity)
-                            }
-                        }
-                        j++
-                    }
-                },
-                {
-                    VolleyLog.d(it.message);
-                }
-            )
+                )
+            }
+            val requestQueue: RequestQueue = Volley.newRequestQueue(applicationContext)
+            requestQueue.add(request)
+            checkDates += 1
         }
-        val requestQueue: RequestQueue = Volley.newRequestQueue(applicationContext)
-        requestQueue.add(request)
     }
     fun isNetworkAvailable(): Boolean {
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -146,20 +172,24 @@ class jobIntentService: JobIntentService() {
         }
         return false
     }
-    fun createVaccineFoundNotification(place: String, address: String, capacity: Int) {
+    fun createVaccineFoundNotification(place: String, address: String, capacity: Int, dateFound: String) {
         val targetIntent = Intent(this, VaccineFoundActivity::class.java).apply {
             putExtra("capacity", capacity)
             putExtra("place", place)
             putExtra("address", address)
+            putExtra("date", dateFound)
         }
         val pendingIntent = PendingIntent.getActivity(this, 0, targetIntent, 0)
+        /* For custom sound */
+        val soundUri =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
         val builder = NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher_foreground)
             .setContentTitle("Vaccine Found!")
             .setContentText("We found a vaccine for you")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
             .setAutoCancel(true)
             .setOngoing(false)
+            .setSound(soundUri)
             .setContentIntent(pendingIntent)
         with(NotificationManagerCompat.from(this)) {
             notify(Constants.NOTIFICATION_ID, builder.build())

@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.judemanutd.autostarter.AutoStartPermissionHelper
 import org.abishek.vaccinechecker.fragments.CurrentStatusFragment
 import org.abishek.vaccinechecker.fragments.StartCheckingFragment
 import org.abishek.vaccinechecker.fragments.onBoardingFragment
@@ -106,6 +108,7 @@ class MainActivity : AppCompatActivity() {
                 identifier
             )
         }
+        /* Cancel the current alarm manager pending intent so that the new one can be set */
         if(currentPendingIntentMode == Constants.ConstantSharedPreferences.mode_set) {
             cancelAllChecking()
         }
@@ -153,9 +156,35 @@ class MainActivity : AppCompatActivity() {
         with(NotificationManagerCompat.from(this)) {
             notify(Constants.NOTIFICATION_ID, builder.build())
         }
+        /* Is autostarup permission needed? */
+        if(AutoStartPermissionHelper.getInstance().isAutoStartPermissionAvailable(this)) {
+            if(
+                sharedPreferences.getInt(
+                    Constants.ConstantSharedPreferences.autostart,
+                    Constants.ConstantSharedPreferences.autostart_disabled) !=
+                        Constants.ConstantSharedPreferences.autostart_enabled
+            ) {
+                enableAutoStart()
+            }
+        }
+        /* Transition to current status fragment*/
         transitionToCurrentStatus()
     }
 
+    fun enableAutoStart() {
+        /* We have autostart settings but it is not enabled. let's show a dialog */
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Permission required")
+            .setMessage("In order for the app to run in background, please give Vaccine Finder auto start permission in the screen that appears after pressing ok.")
+            .setPositiveButton("OK") { dialog, which ->
+                if(AutoStartPermissionHelper.getInstance().getAutoStartPermission(this)) {
+                    sharedPreferencesEditor.putInt(Constants.ConstantSharedPreferences.autostart, Constants.ConstantSharedPreferences.autostart_enabled)
+                    sharedPreferencesEditor.apply()
+                }
+
+            }
+            .show()
+    }
     fun navigateAsSharedPreference() {
         val mode = sharedPreferences.getInt(Constants.ConstantSharedPreferences.mode,
             Constants.ConstantSharedPreferences.mode_unset)
