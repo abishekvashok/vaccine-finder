@@ -54,7 +54,7 @@ class jobIntentService: JobIntentService() {
             .setSmallIcon(R.mipmap.ic_launcher_foreground)
             .setContentTitle("Actively searching for vaccines")
             .setContentText("Will notify you when we find an open slot")
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
             .setAutoCancel(false)
             .setOngoing(true)
             .setContentIntent(pendingIntent)
