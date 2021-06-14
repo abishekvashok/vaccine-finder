@@ -7,12 +7,17 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
+import android.net.ConnectivityManager.*
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.os.SystemClock
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.judemanutd.autostarter.AutoStartPermissionHelper
@@ -167,8 +172,58 @@ class MainActivity : AppCompatActivity() {
                 enableAutoStart()
             }
         }
+        val packageName = packageName
+        /* I hate the doze mode */
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            val powerManager: PowerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            if(!powerManager.isIgnoringBatteryOptimizations(packageName)){
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("Permission required")
+                    .setMessage("In order for the app to run in background, please allow Vaccine Finder to run in the background")
+                    .setPositiveButton("OK") { dialog, which ->
+                        val powerIntent = Intent().apply {
+                            setAction(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            setData(Uri.parse("package:" + packageName))
+                        }
+                        startActivity(powerIntent)
+                    }
+                    .show()
+            }
+        }
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            (getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).apply {
+                // Checks if the device is on a metered network
+                if (isActiveNetworkMetered) {
+                    // Checks user’s Data Saver settings.
+                    when (restrictBackgroundStatus) {
+                        RESTRICT_BACKGROUND_STATUS_ENABLED -> {
+                            showBackgroundDataDialogue()
+                        }
+                        RESTRICT_BACKGROUND_STATUS_DISABLED -> {
+                            showBackgroundDataDialogue()
+                        }
+                    }
+                }
+            }
+        }
         /* Transition to current status fragment*/
         transitionToCurrentStatus()
+    }
+
+    fun showBackgroundDataDialogue() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Permission required")
+            .setMessage("In order for the app to run in background, please allow Vaccine Finder to connect to the COWIN API in the background")
+            .setPositiveButton("OK") { dialog, which ->
+                val dataIntent = Intent().apply {
+                    setAction(android.provider.Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS)
+                    setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    setData(Uri.parse("package:" + packageName))
+                }
+                startActivity(dataIntent)
+            }
+            .show()
     }
 
     fun enableAutoStart() {

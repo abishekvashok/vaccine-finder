@@ -64,9 +64,8 @@ class jobIntentService: JobIntentService() {
         val gc = GregorianCalendar()
         val dateFormat: DateFormat = SimpleDateFormat("dd-MM-yyyy")
         var vaccineFound = false
-        var checkDates = 1
+        var checkDates = 0
         while((checkDates <= 7) && (vaccineFound == false)) {
-            gc.add(Calendar.DATE, 1)
             val date = dateFormat.format(gc.getTime())
             val mode = sharedPreferences.getInt(
                 Constants.ConstantSharedPreferences.search_with,
@@ -145,6 +144,7 @@ class jobIntentService: JobIntentService() {
             val requestQueue: RequestQueue = Volley.newRequestQueue(applicationContext)
             requestQueue.add(request)
             checkDates += 1
+            gc.add(Calendar.DATE, 1)
         }
     }
     fun isNetworkAvailable(): Boolean {
