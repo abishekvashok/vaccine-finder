@@ -61,9 +61,9 @@ class MainActivity : AppCompatActivity() {
                 .setOngoing(true)
                 .setContentIntent(pendingIntentNotif)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val importance = NotificationManager.IMPORTANCE_DEFAULT
+                val importance = NotificationManager.IMPORTANCE_MIN
                 val channel = NotificationChannel(Constants.NOTIFICATION_CHANNEL_ID, "Main", importance).apply {
-                    description = "All notifications and alerts"
+                    description = "All notifications and alerts except the vaccine found notification"
                 }
                 // Register the channel with the system
                 val notificationManager: NotificationManager =

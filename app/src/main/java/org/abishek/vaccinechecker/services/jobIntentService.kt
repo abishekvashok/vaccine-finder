@@ -1,20 +1,23 @@
 package org.abishek.vaccinechecker.services
 
 import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
-import android.util.Log
 import androidx.core.app.JobIntentService
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.android.volley.RequestQueue
 import com.android.volley.VolleyLog
-import com.android.volley.toolbox.*
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import org.abishek.vaccinechecker.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -182,7 +185,7 @@ class jobIntentService: JobIntentService() {
         val pendingIntent = PendingIntent.getActivity(this, 0, targetIntent, 0)
         /* For custom sound */
         val soundUri =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        val builder = NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_V_ID)
             .setSmallIcon(R.mipmap.ic_launcher_foreground)
             .setContentTitle("Vaccine Found!")
             .setContentText("We found a vaccine for you")
@@ -191,8 +194,25 @@ class jobIntentService: JobIntentService() {
             .setOngoing(false)
             .setSound(soundUri)
             .setContentIntent(pendingIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val importance = NotificationManager.IMPORTANCE_MAX
+            val audioAttributes = AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .build()
+            val channel = NotificationChannel(Constants.NOTIFICATION_CHANNEL_V_ID, "Vaccine found", importance).apply {
+                description = "Vaccine Found Notifications"
+                enableLights(true)
+                enableVibration(true)
+                setSound(soundUri, audioAttributes)
+            }
+            // Registering the channel with the system doesn't change anything.
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
         with(NotificationManagerCompat.from(this)) {
-            notify(Constants.NOTIFICATION_ID, builder.build())
+            notify(Constants.NOTIFICATION_V_ID, builder.build())
         }
     }
 }
