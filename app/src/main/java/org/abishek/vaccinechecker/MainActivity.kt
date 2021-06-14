@@ -172,19 +172,17 @@ class MainActivity : AppCompatActivity() {
                 enableAutoStart()
             }
         }
-        val packageName = packageName
         /* I hate the doze mode */
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             val powerManager: PowerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
             if(!powerManager.isIgnoringBatteryOptimizations(packageName)){
                 MaterialAlertDialogBuilder(this)
                     .setTitle("Permission required")
-                    .setMessage("In order for the app to run in background, please allow Vaccine Finder to run in the background")
+                    .setMessage("In order for the app to run in background, please allow Vaccine Finder to run unrestrictedly in the background.")
                     .setPositiveButton("OK") { dialog, which ->
                         val powerIntent = Intent().apply {
                             setAction(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
                             setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            setData(Uri.parse("package:" + packageName))
                         }
                         startActivity(powerIntent)
                     }
