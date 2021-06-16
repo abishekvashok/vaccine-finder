@@ -11,6 +11,7 @@ import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
+import android.util.Log
 import androidx.core.app.JobIntentService
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -34,6 +35,7 @@ class jobIntentService: JobIntentService() {
             this, 0, broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         val sharedPreferences = getSharedPreferences(Constants.ConstantSharedPreferences.name, MODE_PRIVATE)
         val min_age = sharedPreferences.getString(Constants.ConstantSharedPreferences.category, "45")!!.toInt()
+        val dose = sharedPreferences.getInt(Constants.ConstantSharedPreferences.dose_mode, Constants.ConstantSharedPreferences.dose1)
         if(!isNetworkAvailable()) {
             val pendingIntent: PendingIntent = PendingIntent.getActivity(
                 this, 0, Intent(this, NoNetworkActivity::class.java), 0)
@@ -96,14 +98,21 @@ class jobIntentService: JobIntentService() {
                             while (j < sessions.length()) {
                                 val session = (sessions.get(j) as JSONObject)
                                 if (session.get("min_age_limit").toString().toInt() <= min_age) {
-                                    val capacity =
-                                        session.get("available_capacity").toString().toInt()
+                                    val capacity: Int
+                                    if(dose == Constants.ConstantSharedPreferences.dose1) {
+                                        capacity =
+                                            session.get("available_capacity_dose1").toString().toInt()
+                                    } else {
+                                        capacity =
+                                            session.get("available_capacity_dose2").toString().toInt()
+                                    }
                                     if (capacity > 0) {
                                         createVaccineFoundNotification(
                                             center_name,
                                             center_address,
                                             capacity,
-                                            date.toString()
+                                            date.toString(),
+                                            dose
                                         )
                                         vaccineFound = true
                                     }
@@ -130,9 +139,16 @@ class jobIntentService: JobIntentService() {
                         while (j < sessions.length()) {
                             val session = (sessions.get(j) as JSONObject)
                             if (session.get("min_age_limit").toString().toInt() <= min_age) {
-                                val capacity = session.get("available_capacity").toString().toInt()
+                                val capacity: Int
+                                if(dose == Constants.ConstantSharedPreferences.dose1) {
+                                    capacity =
+                                        session.get("available_capacity_dose1").toString().toInt()
+                                } else {
+                                    capacity =
+                                        session.get("available_capacity_dose2").toString().toInt()
+                                }
                                 if (capacity > 0) {
-                                    createVaccineFoundNotification("", "", capacity, date.toString())
+                                    createVaccineFoundNotification("", "", capacity, date.toString(), dose)
                                     vaccineFound = true
                                 }
                             }
@@ -175,12 +191,13 @@ class jobIntentService: JobIntentService() {
         }
         return false
     }
-    fun createVaccineFoundNotification(place: String, address: String, capacity: Int, dateFound: String) {
+    fun createVaccineFoundNotification(place: String, address: String, capacity: Int, dateFound: String, dose: Int) {
         val targetIntent = Intent(this, VaccineFoundActivity::class.java).apply {
             putExtra("capacity", capacity)
             putExtra("place", place)
             putExtra("address", address)
             putExtra("date", dateFound)
+            putExtra("dose", dose)
         }
         val pendingIntent = PendingIntent.getActivity(this, 0, targetIntent, 0)
         /* For custom sound */
@@ -195,7 +212,7 @@ class jobIntentService: JobIntentService() {
             .setSound(soundUri)
             .setContentIntent(pendingIntent)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val importance = NotificationManager.IMPORTANCE_MAX
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val audioAttributes = AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION)

@@ -19,6 +19,9 @@ object Constants {
         const val autostart = "autostart"
         const val autostart_enabled = 1
         const val autostart_disabled = 0
+        const val dose_mode = "dose_mode"
+        const val dose1 = 1
+        const val dose2 = 2
     }
     object SearchWith {
         const val pincode = 1

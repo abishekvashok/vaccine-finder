@@ -43,11 +43,19 @@ class StartCheckingFragment : Fragment() {
         val district_picker = view.findViewById<AutoCompleteTextView>(R.id.auto_district_picker)
         val adapter = ArrayAdapter(requireContext(), R.layout.layout_adapter_item, Constants.district_names)
         district_picker.setAdapter(adapter)
+        val dose_category = view.findViewById<RadioGroup>(R.id.radio_group_dose)
         val button_cancel_notify = view.findViewById<Button>(R.id.button_cencel_notify)
 
         button_start_notify.setOnClickListener {
             val age_category_45 = view.findViewById<Chip>(R.id.chip_45).isChecked
             val age_category_18 = view.findViewById<Chip>(R.id.chip_18).isChecked
+            val checkedDose = dose_category.checkedRadioButtonId
+            val dose: Int
+            if(checkedDose == R.id.radio_button_dose2) {
+                dose = Constants.ConstantSharedPreferences.dose2
+            } else {
+                dose = Constants.ConstantSharedPreferences.dose1
+            }
             if(age_category_18 || age_category_45) {
                 val checkedId = radio_group_search_method.checkedRadioButtonId
                 if (checkedId == R.id.radio_button_district) {
@@ -60,7 +68,8 @@ class StartCheckingFragment : Fragment() {
                             district_code,
                             age_category_18,
                             age_category_45,
-                            Constants.SearchWith.district
+                            Constants.SearchWith.district,
+                            dose
                         )
                     } else {
                         Snackbar.make(view, "Please enter a valid district name", Snackbar.LENGTH_LONG)
@@ -77,7 +86,8 @@ class StartCheckingFragment : Fragment() {
                             pincode,
                             age_category_18,
                             age_category_45,
-                            Constants.SearchWith.pincode
+                            Constants.SearchWith.pincode,
+                            dose
                         )
                     }
                 }

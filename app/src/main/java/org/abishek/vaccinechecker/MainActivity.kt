@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         NotificationManagerCompat.from(this).cancel(Constants.NOTIFICATION_ID)
     }
 
-    fun startChecking(identifier: String, category_18: Boolean, category_45: Boolean, search_with: Int){
+    fun startChecking(identifier: String, category_18: Boolean, category_45: Boolean, search_with: Int, dose: Int){
         val currentPendingIntentMode = sharedPreferences.getInt(
             Constants.ConstantSharedPreferences.mode, Constants.ConstantSharedPreferences.mode_unset)
         if(search_with == Constants.SearchWith.pincode) {
@@ -121,12 +121,13 @@ class MainActivity : AppCompatActivity() {
             Constants.ConstantSharedPreferences.mode_set)
         sharedPreferencesEditor.putInt(Constants.ConstantSharedPreferences.search_with, search_with)
         val category: String?
-        if(category_18) {
-            category = "18"
-        } else {
+        if(category_45) {
             category = "45"
+        } else {
+            category = "18"
         }
         sharedPreferencesEditor.putString(Constants.ConstantSharedPreferences.category, category)
+        sharedPreferencesEditor.putInt(Constants.ConstantSharedPreferences.dose_mode, dose)
         sharedPreferencesEditor.commit()
         val broadcastIntent = Intent(this, broadcastIntent::class.java)
         pendingIntent =
@@ -266,19 +267,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getStatusText(): String{
-        val return_string: String?
+        val return_string: String
         if(sharedPreferences.getInt(Constants.ConstantSharedPreferences.search_with,
                 Constants.SearchWith.pincode ) == Constants.SearchWith.pincode) {
-            return_string = "We are actively searching for vaccines based on the pincode " +
+            return_string = "We are actively searching for dose " +
+                    sharedPreferences.getInt(Constants.ConstantSharedPreferences.dose_mode, Constants.ConstantSharedPreferences.dose1).toString() +
+                    " vaccines based on the pincode " +
                     sharedPreferences.getString(Constants.ConstantSharedPreferences.pincode, "0")
         } else {
-            return_string = "We are actively searching for vaccines based on the district " +
+            return_string = "We are actively searching for dose " +
+                    sharedPreferences.getInt(Constants.ConstantSharedPreferences.dose_mode, Constants.ConstantSharedPreferences.dose1).toString() +
+                    "vaccines based on the district " +
                     Constants.district_names.get(
                         Constants.district_ids.indexOf(
                         sharedPreferences.getString(
                             Constants.ConstantSharedPreferences.district_id, "0"
-                        )
-                        )
+                        ))
                     )
         }
         return return_string

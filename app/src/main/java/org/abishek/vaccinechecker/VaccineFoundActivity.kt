@@ -21,7 +21,8 @@ class VaccineFoundActivity : AppCompatActivity() {
         val center_address = intent.getStringExtra("address")
         val capacity = intent.getIntExtra("capacity", 0).toString()
         val dateFound = intent.getStringExtra("date")
-        var final_text = "We found "+capacity+" vaccine(s) that are available at "+dateFound
+        val dose = intent.getIntExtra("dose", 1).toString()
+        var final_text = "We found "+capacity+" dose "+dose+" vaccine(s) that are available at "+dateFound
         if(center_name?.isNotEmpty() == true) {
             final_text = final_text + " at " + center_name + ", " + center_address
         }
@@ -55,6 +56,7 @@ class VaccineFoundActivity : AppCompatActivity() {
             sharedPreferencesEditor.commit()
             val mainIntent = Intent(this, MainActivity::class.java)
             startActivity(mainIntent)
+            finish()
         }
     }
 }
