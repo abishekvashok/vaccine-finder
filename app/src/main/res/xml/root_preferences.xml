@@ -1,19 +1,6 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory app:title="Support">
-        <Preference
-            android:title="Donate"
-            android:key="donate"
-            android:summary="Show your love by gifting a coffee to the developer"
-            android:icon="@drawable/ic_outline_emoji_food_beverage_24"/>
-        <Preference
-            android:title="Source Code"
-            android:key="sourcecode"
-            android:summary="See source code on Github"
-            android:icon="@drawable/ic_outline_source_24"/>
-    </PreferenceCategory>
-
     <PreferenceCategory app:title="About">
         <Preference
             android:title="License"

@@ -23,11 +23,6 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
-    fun donateClicked() {
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://paypal.me/abishekvashok"))
-        startActivity(browserIntent)
-    }
-
     fun sourceClicked() {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/abishekvashok/vaccine-checker/"))
         startActivity(browserIntent)
@@ -52,13 +47,8 @@ class SettingsActivity : AppCompatActivity() {
     class SettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
-            val donate_button: Preference = findPreference("donate")!!
             val source_button: Preference = findPreference("sourcecode")!!
             val liability_button: Preference = findPreference("liability")!!
-            donate_button.setOnPreferenceClickListener {
-                (activity as SettingsActivity).donateClicked()
-                true
-            }
             source_button.setOnPreferenceClickListener {
                 (activity as SettingsActivity).sourceClicked()
                 true
