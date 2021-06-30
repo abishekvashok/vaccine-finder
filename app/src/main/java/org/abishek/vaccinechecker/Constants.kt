@@ -22,6 +22,8 @@ object Constants {
         const val dose_mode = "dose_mode"
         const val dose1 = 1
         const val dose2 = 2
+        const val price_free = "price_free"
+        const val price_paid = "price_paid"
     }
     object SearchWith {
         const val pincode = 1

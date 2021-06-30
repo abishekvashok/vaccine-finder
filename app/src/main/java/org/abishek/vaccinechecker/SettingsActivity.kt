@@ -47,13 +47,13 @@ class SettingsActivity : AppCompatActivity() {
     class SettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
-            val source_button: Preference = findPreference("sourcecode")!!
-            val liability_button: Preference = findPreference("liability")!!
-            source_button.setOnPreferenceClickListener {
+            val source_button: Preference? = findPreference("sourcecode")
+            val liability_button: Preference? = findPreference("liability")
+            source_button?.setOnPreferenceClickListener {
                 (activity as SettingsActivity).sourceClicked()
                 true
             }
-            liability_button.setOnPreferenceClickListener {
+            liability_button?.setOnPreferenceClickListener {
                 (activity as SettingsActivity).liabilityClicked()
                 true
             }

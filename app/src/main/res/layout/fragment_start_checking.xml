@@ -101,6 +101,32 @@
         <com.google.android.material.textview.MaterialTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Price Category"
+            android:layout_marginTop="10dp"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_price_picker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_free"
+                style="@style/Widget.App.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Free"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_paid"
+                style="@style/Widget.App.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Paid"/>
+        </com.google.android.material.chip.ChipGroup>
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="Dose"
             android:layout_marginTop="10dp"
             android:id="@+id/textview_dose_group" />

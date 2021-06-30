@@ -36,6 +36,8 @@ class jobIntentService: JobIntentService() {
         val sharedPreferences = getSharedPreferences(Constants.ConstantSharedPreferences.name, MODE_PRIVATE)
         val min_age = sharedPreferences.getString(Constants.ConstantSharedPreferences.category, "45")!!.toInt()
         val dose = sharedPreferences.getInt(Constants.ConstantSharedPreferences.dose_mode, Constants.ConstantSharedPreferences.dose1)
+        val price_free = sharedPreferences.getBoolean(Constants.ConstantSharedPreferences.price_free, true)
+        val price_paid = sharedPreferences.getBoolean(Constants.ConstantSharedPreferences.price_paid, true)
         if(!isNetworkAvailable()) {
             val pendingIntent: PendingIntent = PendingIntent.getActivity(
                 this, 0, Intent(this, NoNetworkActivity::class.java), 0)
@@ -94,7 +96,18 @@ class jobIntentService: JobIntentService() {
                                 (centers.get(i) as JSONObject).get("address").toString()
                             val sessions =
                                 (centers.get(i) as JSONObject).get("sessions") as JSONArray
+                            val type =
+                                (centers.get(i) as JSONObject).get("fee_type") as String
                             var j = 0
+                            if(type == "Paid") {
+                                if(!price_paid) {
+                                    continue
+                                }
+                            } else if(type == "Free") {
+                                if(!price_free) {
+                                    continue
+                                }
+                            }
                             while (j < sessions.length()) {
                                 val session = (sessions.get(j) as JSONObject)
                                 if (session.get("min_age_limit").toString().toInt() <= min_age) {
@@ -122,9 +135,7 @@ class jobIntentService: JobIntentService() {
                             i++;
                         }
                     },
-                    {
-                        VolleyLog.d(it.message);
-                    }
+                    {}
                 )
             } else {
                 url =
@@ -138,6 +149,16 @@ class jobIntentService: JobIntentService() {
                         var j = 0
                         while (j < sessions.length()) {
                             val session = (sessions.get(j) as JSONObject)
+                            val type = session.get("fee_type") as String
+                            if(type == "Free") {
+                                if(!price_free) {
+                                    continue
+                                }
+                            } else if (type == "Paid") {
+                                if(!price_paid) {
+                                    continue
+                                }
+                            }
                             if (session.get("min_age_limit").toString().toInt() <= min_age) {
                                 val capacity: Int
                                 if(dose == Constants.ConstantSharedPreferences.dose1) {
@@ -155,9 +176,7 @@ class jobIntentService: JobIntentService() {
                             j++
                         }
                     },
-                    {
-                        VolleyLog.d(it.message);
-                    }
+                    {}
                 )
             }
             val requestQueue: RequestQueue = Volley.newRequestQueue(applicationContext)

@@ -99,7 +99,8 @@ class MainActivity : AppCompatActivity() {
         NotificationManagerCompat.from(this).cancel(Constants.NOTIFICATION_ID)
     }
 
-    fun startChecking(identifier: String, category_18: Boolean, category_45: Boolean, search_with: Int, dose: Int){
+    fun startChecking(identifier: String, category_18: Boolean,
+                      category_45: Boolean, search_with: Int, dose: Int, price_free: Boolean, price_paid: Boolean){
         val currentPendingIntentMode = sharedPreferences.getInt(
             Constants.ConstantSharedPreferences.mode, Constants.ConstantSharedPreferences.mode_unset)
         if(search_with == Constants.SearchWith.pincode) {
@@ -128,6 +129,8 @@ class MainActivity : AppCompatActivity() {
         }
         sharedPreferencesEditor.putString(Constants.ConstantSharedPreferences.category, category)
         sharedPreferencesEditor.putInt(Constants.ConstantSharedPreferences.dose_mode, dose)
+        sharedPreferencesEditor.putBoolean(Constants.ConstantSharedPreferences.price_free, price_free)
+        sharedPreferencesEditor.putBoolean(Constants.ConstantSharedPreferences.price_paid, price_paid)
         sharedPreferencesEditor.commit()
         val broadcastIntent = Intent(this, broadcastIntent::class.java)
         pendingIntent =
@@ -268,16 +271,28 @@ class MainActivity : AppCompatActivity() {
 
     fun getStatusText(): String{
         val return_string: String
+        val price_string: String
+        val price_free = sharedPreferences.getBoolean(Constants.ConstantSharedPreferences.price_paid, true)
+        val price_paid = sharedPreferences.getBoolean(Constants.ConstantSharedPreferences.price_free, true)
+        if(price_free) {
+            if(!price_paid) {
+                price_string = " Free "
+            } else {
+                price_string = " Free and Paid "
+            }
+        } else {
+            price_string = " Paid "
+        }
         if(sharedPreferences.getInt(Constants.ConstantSharedPreferences.search_with,
                 Constants.SearchWith.pincode ) == Constants.SearchWith.pincode) {
-            return_string = "We are actively searching for dose " +
+            return_string = "We are actively searching for"+price_string+"dose " +
                     sharedPreferences.getInt(Constants.ConstantSharedPreferences.dose_mode, Constants.ConstantSharedPreferences.dose1).toString() +
                     " vaccines based on the pincode " +
                     sharedPreferences.getString(Constants.ConstantSharedPreferences.pincode, "0")
         } else {
-            return_string = "We are actively searching for dose " +
+            return_string = "We are actively searching for"+price_string+"dose " +
                     sharedPreferences.getInt(Constants.ConstantSharedPreferences.dose_mode, Constants.ConstantSharedPreferences.dose1).toString() +
-                    "vaccines based on the district " +
+                    " vaccines based on the district " +
                     Constants.district_names.get(
                         Constants.district_ids.indexOf(
                         sharedPreferences.getString(
@@ -291,7 +306,7 @@ class MainActivity : AppCompatActivity() {
     fun shareApp() {
         val sendIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, "Tired searching for vaccines? Here's an app that can search vaccines for you. Download it now from https://abishekvashok.github.io/vaccine-finder/")
+            putExtra(Intent.EXTRA_TEXT, "Tired searching for vaccines? Here's an app that can search vaccines for you. Download it now from https://play.google.com/store/apps/details?id=org.abishek.vaccinechecker")
             type = "text/plain"
         }
         val shareIntent = Intent.createChooser(sendIntent, null)

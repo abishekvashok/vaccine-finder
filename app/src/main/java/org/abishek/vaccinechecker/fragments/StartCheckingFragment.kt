@@ -49,6 +49,8 @@ class StartCheckingFragment : Fragment() {
         button_start_notify.setOnClickListener {
             val age_category_45 = view.findViewById<Chip>(R.id.chip_45).isChecked
             val age_category_18 = view.findViewById<Chip>(R.id.chip_18).isChecked
+            val price_free = view.findViewById<Chip>(R.id.chip_free).isChecked
+            val price_paid = view.findViewById<Chip>(R.id.chip_paid).isChecked
             val checkedDose = dose_category.checkedRadioButtonId
             val dose: Int
             if(checkedDose == R.id.radio_button_dose2) {
@@ -57,39 +59,48 @@ class StartCheckingFragment : Fragment() {
                 dose = Constants.ConstantSharedPreferences.dose1
             }
             if(age_category_18 || age_category_45) {
-                val checkedId = radio_group_search_method.checkedRadioButtonId
-                if (checkedId == R.id.radio_button_district) {
-                    val district_name = district_picker.text.toString()
-                    if(district_name in Constants.district_names) {
-                        val district_position = Constants.district_names.indexOf(district_name)
-                        val district_code =
-                            Constants.district_ids.get(district_position)
-                        (activity as MainActivity).startChecking(
-                            district_code,
-                            age_category_18,
-                            age_category_45,
-                            Constants.SearchWith.district,
-                            dose
-                        )
+                if(price_free || price_paid) {
+                    val checkedId = radio_group_search_method.checkedRadioButtonId
+                    if (checkedId == R.id.radio_button_district) {
+                        val district_name = district_picker.text.toString()
+                        if(district_name in Constants.district_names) {
+                            val district_position = Constants.district_names.indexOf(district_name)
+                            val district_code =
+                                Constants.district_ids.get(district_position)
+                            (activity as MainActivity).startChecking(
+                                district_code,
+                                age_category_18,
+                                age_category_45,
+                                Constants.SearchWith.district,
+                                dose,
+                                price_free,
+                                price_paid
+                            )
+                        } else {
+                            Snackbar.make(view, "Please enter a valid district name", Snackbar.LENGTH_LONG)
+                                .show()
+                        }
                     } else {
-                        Snackbar.make(view, "Please enter a valid district name", Snackbar.LENGTH_LONG)
-                            .show()
+                        val pincode =
+                            view.findViewById<TextInputEditText>(R.id.textfield_pincode).text.toString()
+                        if ((pincode.isEmpty()) || (pincode.length != 6)) {
+                            Snackbar.make(view, "Please enter a valid pincode", Snackbar.LENGTH_LONG)
+                                .show()
+                        } else {
+                            (activity as MainActivity).startChecking(
+                                pincode,
+                                age_category_18,
+                                age_category_45,
+                                Constants.SearchWith.pincode,
+                                dose,
+                                price_free,
+                                price_paid
+                            )
+                        }
                     }
                 } else {
-                    val pincode =
-                        view.findViewById<TextInputEditText>(R.id.textfield_pincode).text.toString()
-                    if ((pincode.isEmpty()) || (pincode.length != 6)) {
-                        Snackbar.make(view, "Please enter a valid pincode", Snackbar.LENGTH_LONG)
-                            .show()
-                    } else {
-                        (activity as MainActivity).startChecking(
-                            pincode,
-                            age_category_18,
-                            age_category_45,
-                            Constants.SearchWith.pincode,
-                            dose
-                        )
-                    }
+                    Snackbar.make(view, "Please select a price category", Snackbar.LENGTH_LONG)
+                        .show()
                 }
             } else {
                 Snackbar.make(view, "Please select at least one age category", Snackbar.LENGTH_LONG)

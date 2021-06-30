@@ -18,9 +18,12 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"></activity>
-        <activity android:name=".NoNetworkActivity" />
-        <activity android:name=".VaccineFoundActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".NoNetworkActivity"
+            android:hardwareAccelerated="false"/>
+        <activity android:name=".VaccineFoundActivity"
+            android:hardwareAccelerated="false"/>
+        <activity android:name=".MainActivity"
+            android:hardwareAccelerated="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
